@@ -122,3 +122,4 @@ export const deleteEvent = (req: Request, res: Response) => {
   }
   res.json({ success: true, message: `Event '${id}' successfully removed` });
 };
+

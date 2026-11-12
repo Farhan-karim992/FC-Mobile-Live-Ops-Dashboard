@@ -74,3 +74,4 @@ export function usePerformanceMonitor() {
 
   return { stats, networkLogs, clearLogs: () => setNetworkLogs([]) };
 }
+

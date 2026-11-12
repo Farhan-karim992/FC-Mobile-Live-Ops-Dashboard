@@ -175,3 +175,4 @@ To investigate rendering performance and mobile responsiveness:
 
 ## 📄 License
 MIT License. Built for demonstration of high-performance mobile football live-ops systems.
+

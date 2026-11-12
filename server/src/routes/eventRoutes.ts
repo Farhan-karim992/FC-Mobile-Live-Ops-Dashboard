@@ -10,3 +10,4 @@ router.patch('/:id', updateEvent);
 router.delete('/:id', deleteEvent);
 
 export default router;
+

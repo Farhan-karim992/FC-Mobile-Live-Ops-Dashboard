@@ -84,3 +84,4 @@ export const resetData = (_req: Request, res: Response) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+

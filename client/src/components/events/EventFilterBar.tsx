@@ -164,3 +164,4 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
     </div>
   );
 };
+

@@ -88,3 +88,4 @@ export const togglePlayerBoost = (req: Request, res: Response) => {
     message: `${updated.knownAs} form boost ${updated.isLiveBoostActive ? 'activated (+2 OVR)' : 'deactivated'}`,
   });
 };
+

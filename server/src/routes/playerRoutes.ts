@@ -8,3 +8,4 @@ router.get('/:id', getPlayerById);
 router.patch('/:id/boost', togglePlayerBoost);
 
 export default router;
+

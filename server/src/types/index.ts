@@ -125,3 +125,4 @@ export interface AuditLogEntry {
   category: 'EVENT' | 'STORE' | 'BROADCAST' | 'HOTFIX';
   details: string;
 }
+
