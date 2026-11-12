@@ -1,0 +1,249 @@
+:root {
+  --bg-primary: #070a0e;
+  --bg-secondary: #0d131a;
+  --bg-card: #121a24;
+  --bg-card-hover: #172230;
+  --bg-elevated: #1a2636;
+  
+  --border-subtle: #1e2c3d;
+  --border-bright: #2d425c;
+  --border-focus: #00ff87;
+
+  --fc-volt: #00ff87;
+  --fc-volt-glow: rgba(0, 255, 135, 0.35);
+  --fc-cyan: #00f0ff;
+  --fc-cyan-glow: rgba(0, 240, 255, 0.3);
+  --fc-gold: #ffd200;
+  --fc-gold-glow: rgba(255, 210, 0, 0.35);
+  --fc-crimson: #ff3366;
+  --fc-crimson-glow: rgba(255, 51, 102, 0.35);
+  --fc-purple: #9d4edd;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #070a0e;
+
+  --font-heading: 'Chakra Petch', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.6);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
+  --shadow-neon: 0 0 20px var(--fc-volt-glow);
+}
+
+/* Base Resets */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background Pitch Grid Texture */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(0, 255, 135, 0.04) 0%, transparent 60%),
+    radial-gradient(circle at 100% 50%, rgba(0, 240, 255, 0.03) 0%, transparent 40%),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  z-index: -1;
+}
+
+/* Utility Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-bright);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fc-volt);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
+/* Football Card Specific Styles */
+.fc-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  user-select: none;
+}
+.fc-card:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Card Rarity Frames */
+.card-toty {
+  background: linear-gradient(145deg, #0f1c3f 0%, #081126 100%);
+  border: 1.5px solid #295299;
+  box-shadow: 0 4px 20px rgba(16, 42, 99, 0.5), inset 0 0 15px rgba(0, 240, 255, 0.2);
+}
+.card-toty:hover {
+  border-color: var(--fc-cyan);
+  box-shadow: 0 8px 30px rgba(0, 240, 255, 0.35);
+}
+
+.card-prime-icon {
+  background: linear-gradient(145deg, #2a2205 0%, #151000 100%);
+  border: 1.5px solid #b8860b;
+  box-shadow: 0 4px 20px rgba(184, 134, 11, 0.4), inset 0 0 15px rgba(255, 215, 0, 0.25);
+}
+.card-prime-icon:hover {
+  border-color: var(--fc-gold);
+  box-shadow: 0 8px 30px rgba(255, 210, 0, 0.45);
+}
+
+.card-rulebreaker {
+  background: linear-gradient(145deg, #122118 0%, #08110c 100%);
+  border: 1.5px solid #10b981;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35), inset 0 0 15px rgba(0, 255, 135, 0.2);
+}
+.card-rulebreaker:hover {
+  border-color: var(--fc-volt);
+  box-shadow: 0 8px 30px var(--fc-volt-glow);
+}
+
+.card-ucl {
+  background: linear-gradient(145deg, #051937 0%, #001026 100%);
+  border: 1.5px solid #004e92;
+  box-shadow: 0 4px 20px rgba(0, 78, 146, 0.4);
+}
+.card-ucl:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 8px 30px rgba(56, 189, 248, 0.35);
+}
+
+.card-hero {
+  background: linear-gradient(145deg, #2b1029 0%, #170716 100%);
+  border: 1.5px solid #c026d3;
+  box-shadow: 0 4px 20px rgba(192, 38, 211, 0.35);
+}
+.card-hero:hover {
+  border-color: #f43f5e;
+  box-shadow: 0 8px 30px rgba(244, 63, 94, 0.4);
+}
+
+/* Hologram Shimmer Animation */
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 65%
+  );
+  transform: rotate(30deg);
+  animation: shimmerMove 4s infinite linear;
+  pointer-events: none;
+}
+@keyframes shimmerMove {
+  0% { transform: translateY(-100%) rotate(30deg); }
+  100% { transform: translateY(100%) rotate(30deg); }
+}
+
+/* Pulsing Live Dot */
+.live-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--fc-volt);
+  box-shadow: 0 0 10px var(--fc-volt);
+  animation: pulseDot 1.8s infinite ease-in-out;
+}
+.live-pulse.urgent {
+  background-color: var(--fc-crimson);
+  box-shadow: 0 0 10px var(--fc-crimson);
+  animation: pulseDot 0.9s infinite ease-in-out;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Stat Hexagon / Badge numbers */
+.stat-ovr {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Interactive DevTools Frame Simulator */
+.device-frame-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+.device-frame-iphone {
+  max-width: 393px;
+  border: 12px solid #262626;
+  border-radius: 44px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+.device-frame-pixel {
+  max-width: 412px;
+  border: 10px solid #1a1a1a;
+  border-radius: 36px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+.device-frame-ipad {
+  max-width: 768px;
+  border: 14px solid #222;
+  border-radius: 28px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
