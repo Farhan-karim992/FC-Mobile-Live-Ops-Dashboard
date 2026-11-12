@@ -594,7 +594,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [138000000, 140000000, 142000000, 139000000, 143000000, 144500000, 145000000],
     isLiveBoostActive: true,
     boostAmount: 2,
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e5/Kylian_Mbapp%C3%A9_2018.jpg',
     workRate: 'High / Low',
   },
   {
@@ -618,7 +618,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [119000000, 122000000, 124000000, 126000000, 125000000, 127000000, 128000000],
     isLiveBoostActive: true,
     boostAmount: 2,
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Jude_Bellingham_EA_Sports_2024.jpg',
     workRate: 'High / High',
   },
   {
@@ -642,7 +642,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [102000000, 106000000, 109000000, 111000000, 113000000, 114000000, 115000000],
     isLiveBoostActive: false,
     boostAmount: 0,
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/07/Erling_Haaland_2023_%28cropped%29.jpg',
     workRate: 'High / Medium',
   },
   {
@@ -666,7 +666,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [82000000, 84000000, 85500000, 87000000, 86000000, 88000000, 89000000],
     isLiveBoostActive: false,
     boostAmount: 0,
-    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/10/Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg',
     workRate: 'High / Medium',
   },
   {
@@ -690,7 +690,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [310000000, 315000000, 318000000, 320000000, 322000000, 319000000, 320000000],
     isLiveBoostActive: true,
     boostAmount: 1,
-    avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f3/Zinedine_Zidane_by_Tasnim_03.jpg',
     workRate: 'High / Medium',
   },
   {
@@ -714,7 +714,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [270000000, 275000000, 278000000, 282000000, 280000000, 279000000, 280000000],
     isLiveBoostActive: false,
     boostAmount: 0,
-    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg',
     workRate: 'Medium / Low',
   },
   {
@@ -738,7 +738,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [285000000, 288000000, 292000000, 290000000, 294000000, 296000000, 295000000],
     isLiveBoostActive: false,
     boostAmount: 0,
-    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Cristiano_Ronaldo_2018.jpg',
     workRate: 'High / Low',
   },
   {
@@ -762,7 +762,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [104000000, 107000000, 108000000, 109000000, 110000000, 111000000, 110000000],
     isLiveBoostActive: true,
     boostAmount: 2,
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Virgil_van_Dijk_2019.jpg',
     workRate: 'Medium / High',
   },
   {
@@ -786,7 +786,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [88000000, 90000000, 92000000, 94000000, 94500000, 95000000, 95000000],
     isLiveBoostActive: false,
     boostAmount: 0,
-    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/41/RODRI_-_SWE_vs_ESP_-_UEFA_EURO_2020_QUALIFIERS_-_2019.10.15_%28cropped%29.jpg',
     workRate: 'Medium / High',
   },
   {
@@ -810,7 +810,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [98000000, 101000000, 102500000, 104000000, 103000000, 105000000, 105000000],
     isLiveBoostActive: false,
     boostAmount: 0,
-    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/40/Kevin_De_Bruyne_201807091.jpg',
     workRate: 'High / High',
   },
   {
@@ -834,7 +834,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [68000000, 69000000, 71000000, 70500000, 71500000, 72000000, 72000000],
     isLiveBoostActive: true,
     boostAmount: 2,
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Bukayo_Saka.jpg',
     workRate: 'High / Medium',
   },
   {
@@ -858,7 +858,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     priceTrend: [61000000, 62500000, 63000000, 64000000, 64500000, 65000000, 65000000],
     isLiveBoostActive: false,
     boostAmount: 0,
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Alisson_Becker_Brazil_V_Morocco_13_June_2026-65_%28cropped%29.jpg',
     workRate: 'Medium / Medium',
   },
 ];

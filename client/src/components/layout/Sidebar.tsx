@@ -5,8 +5,6 @@ import {
   Users,
   ShoppingBag,
   Sliders,
-  Cpu,
-  GraduationCap,
 } from 'lucide-react';
 import { useLiveOps } from '../../context/LiveOpsContext';
 import { ViewTab } from '../../types';
@@ -23,12 +21,10 @@ export const Sidebar: React.FC = () => {
 
   const navItems: NavItem[] = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={18} /> },
-    { id: 'events', label: 'Live Events', icon: <Calendar size={18} />, badge: '6 Active' },
+    { id: 'events', label: 'Live Events', icon: <Calendar size={18} />, badge: '8 Active' },
     { id: 'players', label: 'Player Items', icon: <Users size={18} /> },
     { id: 'store', label: 'Store & Packs', icon: <ShoppingBag size={18} />, badge: 'Flash 4h' },
     { id: 'operations', label: 'Command Center', icon: <Sliders size={18} /> },
-    { id: 'performance', label: 'DevTools & Perf', icon: <Cpu size={18} /> },
-    { id: 'interview', label: 'Interview Guide', icon: <GraduationCap size={18} />, badge: 'EA Q&A' },
   ];
 
   return (

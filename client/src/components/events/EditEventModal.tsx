@@ -257,3 +257,4 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     </Modal>
   );
 };
+

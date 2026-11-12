@@ -9,12 +9,9 @@ import { EventsView } from './components/events/EventsView';
 import { PlayerCatalog } from './components/players/PlayerCatalog';
 import { StorePacksGrid } from './components/store/StorePacksGrid';
 import { OperationsView } from './components/operations/OperationsView';
-import { DevToolsInspectorPanel } from './components/performance/DevToolsInspectorPanel';
-import { InterviewGuideView } from './components/interview/InterviewGuideView';
-import { Modal } from './components/common/Modal';
 
 const DashboardContent: React.FC = () => {
-  const { activeTab, devToolsOpen, setDevToolsOpen, devToolsSettings } = useLiveOps();
+  const { activeTab } = useLiveOps();
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -28,26 +25,8 @@ const DashboardContent: React.FC = () => {
         return <StorePacksGrid />;
       case 'operations':
         return <OperationsView />;
-      case 'performance':
-        return <DevToolsInspectorPanel />;
-      case 'interview':
-        return <InterviewGuideView />;
       default:
         return <LiveOpsOverview />;
-    }
-  };
-
-  // Device frame class logic for mobile emulation
-  const getDeviceFrameClass = () => {
-    switch (devToolsSettings.deviceViewport) {
-      case 'iphone':
-        return 'device-frame-iphone';
-      case 'pixel':
-        return 'device-frame-pixel';
-      case 'ipad':
-        return 'device-frame-ipad';
-      default:
-        return '';
     }
   };
 
@@ -60,8 +39,8 @@ const DashboardContent: React.FC = () => {
       <div className="main-content">
         <Header />
 
-        <main className={`content-body ${devToolsSettings.deviceViewport !== 'native' ? 'device-frame-container' : ''}`}>
-          <div className={getDeviceFrameClass()} style={{ width: '100%' }}>
+        <main className="content-body">
+          <div style={{ width: '100%' }}>
             {renderActiveTab()}
           </div>
         </main>
@@ -69,17 +48,6 @@ const DashboardContent: React.FC = () => {
         {/* Mobile Bottom Navigation Bar */}
         <MobileNav />
       </div>
-
-      {/* Floating DevTools Modal / Drawer */}
-      <Modal
-        isOpen={devToolsOpen}
-        onClose={() => setDevToolsOpen(false)}
-        title="Chrome DevTools & Performance Profiler"
-        subtitle="Live inspection HUD, network chaos simulation, and device viewport emulation"
-        maxWidth="820px"
-      >
-        <DevToolsInspectorPanel />
-      </Modal>
 
       {/* Floating Toast Notification Stack */}
       <ToastContainer />
@@ -96,4 +64,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-

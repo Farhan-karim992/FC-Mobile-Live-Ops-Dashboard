@@ -157,7 +157,7 @@ export interface PlayerFilterState {
   order: 'asc' | 'desc';
 }
 
-export type ViewTab = 'overview' | 'events' | 'players' | 'store' | 'operations' | 'performance' | 'interview';
+export type ViewTab = 'overview' | 'events' | 'players' | 'store' | 'operations';
 
 export interface ToastMessage {
   id: string;

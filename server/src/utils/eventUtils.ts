@@ -62,3 +62,4 @@ export function deriveEventStatus(event: LiveEvent, now: number = Date.now()): E
     return 'CONCLUDED';
   }
 }
+

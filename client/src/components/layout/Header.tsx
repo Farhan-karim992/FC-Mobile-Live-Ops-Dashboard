@@ -1,10 +1,10 @@
 import React from 'react';
-import { Cpu, Bell, ShieldAlert } from 'lucide-react';
+import { Bell, ShieldAlert } from 'lucide-react';
 import { useLiveOps } from '../../context/LiveOpsContext';
 import { Button } from '../common/Button';
 
 export const Header: React.FC = () => {
-  const { devToolsOpen, setDevToolsOpen, activeBroadcasts, setActiveTab } = useLiveOps();
+  const { activeBroadcasts, setActiveTab } = useLiveOps();
 
   return (
     <header
@@ -103,7 +103,7 @@ export const Header: React.FC = () => {
           </span>
         </div>
 
-        {/* Emergency Hotfix button */}
+        {/* Live Operations quick action */}
         <Button
           variant="danger"
           size="sm"
@@ -111,18 +111,7 @@ export const Header: React.FC = () => {
           onClick={() => setActiveTab('operations')}
           title="Open Live Operations Center"
         >
-          <span style={{ display: 'none' }} className="sm-inline">Ops Controls</span>
-        </Button>
-
-        {/* DevTools Inspector Trigger Button */}
-        <Button
-          variant={devToolsOpen ? 'cyan' : 'secondary'}
-          size="sm"
-          leftIcon={<Cpu size={14} />}
-          onClick={() => setDevToolsOpen(!devToolsOpen)}
-          title="Open Chrome DevTools & Performance Profiler"
-        >
-          <span style={{ display: 'none' }} className="sm-inline">DevTools & Perf</span>
+          <span style={{ display: 'none' }} className="sm-inline">Command Center</span>
         </Button>
       </div>
 

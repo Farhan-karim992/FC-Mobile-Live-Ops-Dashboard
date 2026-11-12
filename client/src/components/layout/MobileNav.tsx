@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, Users, ShoppingBag, Sliders, Cpu, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, ShoppingBag, Sliders } from 'lucide-react';
 import { useLiveOps } from '../../context/LiveOpsContext';
 import { ViewTab } from '../../types';
 
@@ -7,13 +7,11 @@ export const MobileNav: React.FC = () => {
   const { activeTab, setActiveTab } = useLiveOps();
 
   const items: { id: ViewTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'overview', label: 'Home', icon: <LayoutDashboard size={18} /> },
-    { id: 'events', label: 'Events', icon: <Calendar size={18} /> },
-    { id: 'players', label: 'Players', icon: <Users size={18} /> },
-    { id: 'store', label: 'Store', icon: <ShoppingBag size={18} /> },
-    { id: 'operations', label: 'Ops', icon: <Sliders size={18} /> },
-    { id: 'performance', label: 'DevTools', icon: <Cpu size={18} /> },
-    { id: 'interview', label: 'Guide', icon: <GraduationCap size={18} /> },
+    { id: 'overview', label: 'Home', icon: <LayoutDashboard size={20} /> },
+    { id: 'events', label: 'Events', icon: <Calendar size={20} /> },
+    { id: 'players', label: 'Players', icon: <Users size={20} /> },
+    { id: 'store', label: 'Store', icon: <ShoppingBag size={20} /> },
+    { id: 'operations', label: 'Command', icon: <Sliders size={20} /> },
   ];
 
   return (

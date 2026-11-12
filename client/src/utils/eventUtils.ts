@@ -148,3 +148,4 @@ export function calculateDashboardKPIs(events: LiveEvent[], now: number = Date.n
     statusBreakdown,
   };
 }
+

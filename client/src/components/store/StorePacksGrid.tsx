@@ -352,7 +352,7 @@ export const StorePacksGrid: React.FC = () => {
               </div>
 
               <div style={{ width: '90px', height: '90px', margin: '0.5rem auto', borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(255,255,255,0.2)' }}>
-                <img src={pullResult.player.avatarUrl} alt={pullResult.player.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={pullResult.player.avatarUrl} alt={pullResult.player.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} />
               </div>
 
               <h4 style={{ fontSize: '1.1rem', color: '#fff', textTransform: 'uppercase' }}>
