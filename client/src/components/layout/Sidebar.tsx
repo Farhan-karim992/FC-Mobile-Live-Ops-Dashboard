@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Sliders,
   Cpu,
+  GraduationCap,
 } from 'lucide-react';
 import { useLiveOps } from '../../context/LiveOpsContext';
 import { ViewTab } from '../../types';
@@ -27,6 +28,7 @@ export const Sidebar: React.FC = () => {
     { id: 'store', label: 'Store & Packs', icon: <ShoppingBag size={18} />, badge: 'Flash 4h' },
     { id: 'operations', label: 'Command Center', icon: <Sliders size={18} /> },
     { id: 'performance', label: 'DevTools & Perf', icon: <Cpu size={18} /> },
+    { id: 'interview', label: 'Interview Guide', icon: <GraduationCap size={18} />, badge: 'EA Q&A' },
   ];
 
   return (

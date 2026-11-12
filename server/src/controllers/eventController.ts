@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { db } from '../data/mockDatabase';
-import { EventStatus, EventType } from '../types';
+import { EventStatus, EventType, EventCategory } from '../types';
 
 export const getEvents = (req: Request, res: Response) => {
   try {
     let events = db.getEvents();
 
-    const { search, status, type, sort, order } = req.query;
+    const { search, status, type, category, sort, order } = req.query;
 
     // Search filter
     if (search && typeof search === 'string') {
@@ -25,9 +25,10 @@ export const getEvents = (req: Request, res: Response) => {
       events = events.filter(e => e.status === (status.toUpperCase() as EventStatus));
     }
 
-    // Type filter
-    if (type && typeof type === 'string' && type !== 'ALL') {
-      events = events.filter(e => e.type === (type.toUpperCase() as EventType));
+    // Category / Type filter
+    const catQuery = category || type;
+    if (catQuery && typeof catQuery === 'string' && catQuery !== 'ALL') {
+      events = events.filter(e => (e.category === (catQuery.toUpperCase() as EventCategory)) || (e.type === (catQuery.toUpperCase() as EventCategory)));
     }
 
     // Sorting
@@ -73,7 +74,7 @@ export const getEventById = (req: Request, res: Response) => {
 
 export const createEvent = (req: Request, res: Response) => {
   try {
-    const { title, subtitle, bannerUrl, type, status, priority, startDate, endDate, description, rewardTier, tags, requirements } = req.body;
+    const { title, subtitle, bannerUrl, category, type, isFeatured, status, priority, startDate, endDate, description, rewardTier, tags, requirements } = req.body;
 
     if (!title || !description || !endDate) {
       return res.status(400).json({
@@ -82,11 +83,15 @@ export const createEvent = (req: Request, res: Response) => {
       });
     }
 
+    const eventCategory: EventCategory = (category || type || 'SEASONAL') as EventCategory;
+
     const newEvent = db.createEvent({
       title,
       subtitle: subtitle || 'New Live-Ops Campaign',
       bannerUrl: bannerUrl || 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
-      type: type || 'PROMO',
+      category: eventCategory,
+      type: eventCategory,
+      isFeatured: Boolean(isFeatured),
       status: status || 'ACTIVE',
       priority: priority || 'NORMAL',
       startDate: startDate || new Date().toISOString(),

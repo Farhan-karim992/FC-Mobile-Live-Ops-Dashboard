@@ -228,6 +228,7 @@ describe('MockDatabase In-Memory Store & Domain Operations', () => {
     const countAfterReset = db.getEvents().length;
 
     assert.ok(countAfterReset < countBeforeReset);
-    assert.strictEqual(countAfterReset, 8); // initial 8 seeded events
+    assert.strictEqual(countAfterReset, 24); // initial 24 seeded events
   });
 });
+

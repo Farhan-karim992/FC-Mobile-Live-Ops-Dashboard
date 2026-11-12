@@ -1,6 +1,7 @@
-export type EventType = 'PROMO' | 'TOURNAMENT' | 'FLASH_SALE' | 'CHALLENGE' | 'MILESTONE';
+export type EventCategory = 'SEASONAL' | 'SPECIAL' | 'TOURNAMENT' | 'FLASH_SALE' | 'CHALLENGE' | 'MILESTONE';
+export type EventType = EventCategory;
 
-export type EventStatus = 'ACTIVE' | 'UPCOMING' | 'CONCLUDED' | 'PAUSED';
+export type EventStatus = 'ACTIVE' | 'UPCOMING' | 'CONCLUDED' | 'PAUSED' | 'MISCONFIGURED';
 
 export type EventPriority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'NORMAL';
 
@@ -9,9 +10,11 @@ export interface LiveEvent {
   title: string;
   subtitle: string;
   bannerUrl: string;
-  type: EventType;
+  category: EventCategory;
+  type?: EventCategory; // alias for backwards compatibility
   status: EventStatus;
   priority: EventPriority;
+  isFeatured: boolean;
   startDate: string; // ISO
   endDate: string; // ISO
   resetTimeDailyUtc?: string; // e.g. "19:00 UTC"
@@ -27,6 +30,9 @@ export interface LiveEvent {
     energyCostPerMatch?: number;
   };
   liveFormMultiplier?: number;
+  updatedAt: string;
+  updatedBy: string;
+  validationErrors?: string[];
 }
 
 export type PlayerPosition = 'ST' | 'CF' | 'RW' | 'LW' | 'CAM' | 'CM' | 'CDM' | 'CB' | 'LB' | 'RB' | 'GK';
@@ -76,9 +82,14 @@ export interface ServerNodeHealth {
 }
 
 export interface LiveOpsMetrics {
+  totalEvents: number;
+  activeEventsCount: number;
+  upcomingEventsCount: number;
+  expiredEventsCount: number;
+  misconfiguredCount: number;
+  approachingDeadlineCount: number;
   ccuCurrent: number;
   ccuPeakToday: number;
-  activeEventsCount: number;
   activeBannersCount: number;
   globalDropRateBonus: number;
   serverHealth: ServerNodeHealth[];
@@ -125,4 +136,3 @@ export interface AuditLogEntry {
   category: 'EVENT' | 'STORE' | 'BROADCAST' | 'HOTFIX';
   details: string;
 }
-

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Award, Play, Pause, PlusCircle, Trash2, ExternalLink } from 'lucide-react';
+import { Users, Award, Play, Pause, PlusCircle, Trash2, Edit3, ExternalLink, AlertTriangle, Star } from 'lucide-react';
 import { LiveEvent } from '../../types';
 import { EventCountdownTimer } from './EventCountdownTimer';
 import { Badge } from '../common/Badge';
@@ -7,6 +7,7 @@ import { Badge } from '../common/Badge';
 interface EventCardProps {
   event: LiveEvent;
   onSelect: (event: LiveEvent) => void;
+  onEdit: (event: LiveEvent) => void;
   onToggleStatus: (event: LiveEvent) => void;
   onExtend: (event: LiveEvent) => void;
   onDelete: (id: string) => void;
@@ -15,12 +16,14 @@ interface EventCardProps {
 export const EventCard: React.FC<EventCardProps> = ({
   event,
   onSelect,
+  onEdit,
   onToggleStatus,
   onExtend,
   onDelete,
 }) => {
   const isPaused = event.status === 'PAUSED';
   const isConcluded = event.status === 'CONCLUDED';
+  const isMisconfigured = event.status === 'MISCONFIGURED' || (event.validationErrors && event.validationErrors.length > 0);
 
   const formatParticipants = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -29,16 +32,19 @@ export const EventCard: React.FC<EventCardProps> = ({
   };
 
   const getStatusBadgeVariant = () => {
+    if (isMisconfigured) return 'crimson';
     if (event.status === 'ACTIVE') return 'volt';
     if (event.status === 'PAUSED') return 'gold';
     if (event.status === 'UPCOMING') return 'cyan';
     return 'slate';
   };
 
-  const getTypeBadgeVariant = () => {
-    if (event.type === 'FLASH_SALE') return 'crimson';
-    if (event.type === 'PROMO') return 'gold';
-    if (event.type === 'TOURNAMENT') return 'cyan';
+  const getCategoryBadgeVariant = () => {
+    const cat = event.category || event.type;
+    if (cat === 'FLASH_SALE') return 'crimson';
+    if (cat === 'SEASONAL') return 'gold';
+    if (cat === 'TOURNAMENT') return 'cyan';
+    if (cat === 'CHALLENGE') return 'volt';
     return 'slate';
   };
 
@@ -51,6 +57,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         overflow: 'hidden',
         transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
         cursor: 'pointer',
+        border: isMisconfigured ? '1.5px solid var(--fc-crimson)' : undefined,
       }}
       onClick={() => onSelect(event)}
     >
@@ -72,11 +79,18 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         {/* Top Badges */}
         <div style={{ position: 'absolute', top: '10px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <Badge variant={getTypeBadgeVariant()}>{event.type.replace('_', ' ')}</Badge>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <Badge variant={getCategoryBadgeVariant()}>
+              {(event.category || event.type || 'SPECIAL').replace('_', ' ')}
+            </Badge>
             <Badge variant={getStatusBadgeVariant()} pulse={event.status === 'ACTIVE'}>
               {event.status}
             </Badge>
+            {event.isFeatured && (
+              <Badge variant="gold">
+                <Star size={10} fill="var(--fc-gold)" /> Featured
+              </Badge>
+            )}
           </div>
           {event.priority === 'CRITICAL' && (
             <Badge variant="crimson" pulse>
@@ -85,11 +99,37 @@ export const EventCard: React.FC<EventCardProps> = ({
           )}
         </div>
 
-        {/* Countdown Floating over Banner */}
+        {/* Dynamic Countdown Floating over Banner */}
         <div style={{ position: 'absolute', bottom: '10px', right: '12px' }}>
-          <EventCountdownTimer endDate={event.endDate} isPaused={isPaused} />
+          <EventCountdownTimer
+            startDate={event.startDate}
+            endDate={event.endDate}
+            status={event.status}
+            validationErrors={event.validationErrors}
+            isPaused={isPaused}
+          />
         </div>
       </div>
+
+      {/* Misconfigured Warning Strip */}
+      {isMisconfigured && (
+        <div
+          style={{
+            background: 'rgba(255, 51, 102, 0.2)',
+            borderBottom: '1px solid var(--fc-crimson)',
+            padding: '0.4rem 0.85rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            fontSize: '0.75rem',
+            color: '#fff',
+            fontWeight: 600,
+          }}
+        >
+          <AlertTriangle size={13} color="var(--fc-crimson)" />
+          <span>Configuration Warning: {event.validationErrors?.[0] || 'End Date is before Start Date'}</span>
+        </div>
+      )}
 
       {/* Card Body */}
       <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '0.75rem' }}>
@@ -133,7 +173,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           }}
         >
           <Award size={14} color="var(--fc-gold)" style={{ flexShrink: 0 }} />
-          <span style={{ color: 'var(--text-muted)' }}>Top Tier:</span>
+          <span style={{ color: 'var(--text-muted)' }}>Top Reward:</span>
           <span style={{ color: 'var(--text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {event.rewardTier}
           </span>
@@ -207,11 +247,21 @@ export const EventCard: React.FC<EventCardProps> = ({
               gap: '0.3rem',
             }}
           >
-            <span>View Details</span>
+            <span>Details</span>
             <ExternalLink size={12} />
           </button>
 
           <div style={{ display: 'flex', gap: '0.35rem' }}>
+            {/* Edit Button */}
+            <button
+              className="btn btn-secondary btn-sm"
+              style={{ padding: '0.3rem 0.5rem', fontSize: '0.7rem' }}
+              onClick={() => onEdit(event)}
+              title="Edit Event Parameters"
+            >
+              <Edit3 size={12} color="var(--fc-cyan)" />
+            </button>
+
             {!isConcluded && (
               <button
                 className="btn btn-secondary btn-sm"

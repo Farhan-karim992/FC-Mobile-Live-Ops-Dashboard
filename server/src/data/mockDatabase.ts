@@ -1,90 +1,95 @@
 import { LiveEvent, PlayerCard, LiveOpsMetrics, StorePack, BroadcastAlert, AuditLogEntry } from '../types';
+import { deriveEventStatus, validateEvent } from '../utils/eventUtils';
 
-// Helper to generate ISO dates relative to now
 const now = new Date();
 const addHours = (h: number) => new Date(now.getTime() + h * 3600 * 1000).toISOString();
 const addDays = (d: number) => new Date(now.getTime() + d * 86400 * 1000).toISOString();
 const subDays = (d: number) => new Date(now.getTime() - d * 86400 * 1000).toISOString();
 
 export const INITIAL_EVENTS: LiveEvent[] = [
+  // 1. ACTIVE EVENTS (8 events)
   {
     id: 'evt-toty-2026',
     title: 'Team of the Year (TOTY) Ultimate Chapter',
     subtitle: 'Claim 97+ OVR TOTY Icons & Ultimate XI Stars',
     bannerUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
-    type: 'PROMO',
+    category: 'SEASONAL',
+    type: 'SEASONAL',
     status: 'ACTIVE',
     priority: 'CRITICAL',
+    isFeatured: true,
     startDate: subDays(4),
     endDate: addDays(10),
     resetTimeDailyUtc: '19:00 UTC',
     description: 'Advance through position chapters (Attackers, Midfielders, Defenders). Earn TOTY Energy daily, unlock path milestone rewards, and exchange Nominees for 97 OVR Kylian Mbappé or Jude Bellingham.',
     rewardTier: '97+ OVR Prime TOTY Select',
-    featuredPlayerIds: ['ply-mbappe', 'ply-bellingham', 'ply-rodri', 'ply-vvd'],
+    featuredPlayerIds: ['ply-mbappe', 'ply-bellingham'],
     participantCount: 2840500,
     progressPercentage: 68,
-    tags: ['TOTY', 'Main Event', 'UTOTY', 'Milestone'],
-    requirements: {
-      minOvr: 90,
-      requiredLeague: 'Any',
-      energyCostPerMatch: 15,
-    },
+    tags: ['TOTY', 'Seasonal', 'UTOTY', 'Milestone'],
+    requirements: { minOvr: 90, energyCostPerMatch: 15 },
     liveFormMultiplier: 1.25,
+    updatedAt: subDays(0.5),
+    updatedBy: 'sarah.liveops@eafc.live',
   },
   {
     id: 'evt-ucl-rttf',
     title: 'UEFA Champions League: Road to the Final',
     subtitle: 'Live dynamic OVR upgrades tied to real-world knockout matches',
     bannerUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1200&q=80',
+    category: 'TOURNAMENT',
     type: 'TOURNAMENT',
     status: 'ACTIVE',
     priority: 'HIGH',
-    startDate: subDays(1),
+    isFeatured: true,
+    startDate: subDays(2),
     endDate: addDays(18),
     resetTimeDailyUtc: '19:00 UTC',
     description: 'Compete in Champions League PvE and PvP Tournament brackets. Selected players receive +1 OVR boost each time their real-world team advances in the Round of 16 and Quarterfinals.',
     rewardTier: '95-97 OVR UCL Live Upgrade Card',
-    featuredPlayerIds: ['ply-haaland', 'ply-vinicius', 'ply-debruyne'],
+    featuredPlayerIds: ['ply-haaland', 'ply-vinicius'],
     participantCount: 1420900,
     progressPercentage: 42,
     tags: ['UCL', 'Live Boost', 'Knockout', 'Tournament'],
-    requirements: {
-      minOvr: 88,
-      energyCostPerMatch: 10,
-    },
+    requirements: { minOvr: 88, energyCostPerMatch: 10 },
     liveFormMultiplier: 1.15,
+    updatedAt: subDays(1),
+    updatedBy: 'alex.ops@eafc.live',
   },
   {
     id: 'evt-flash-weekend-24h',
     title: 'Flash 24H Super Challenge: El Clásico Showdown',
     subtitle: 'Limited-time weekend blitz — expires tonight!',
     bannerUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+    category: 'FLASH_SALE',
     type: 'FLASH_SALE',
     status: 'ACTIVE',
     priority: 'CRITICAL',
+    isFeatured: true,
     startDate: subDays(0.5),
-    endDate: addHours(4.5), // Short timer: 4.5 hours!
+    endDate: addHours(4.5), // Approaching deadline!
     resetTimeDailyUtc: '23:59 UTC',
-    description: 'High-intensity 5-match gauntlet with sudden death extra time. Win all 5 matches before the countdown expires to secure a guaranteed 94+ OVR Flash Player and 2,500 Gems.',
+    description: 'High-intensity 5-match gauntlet with sudden death extra time. Win all 5 matches before countdown expires to secure a guaranteed 94+ OVR Flash Player and 2,500 Gems.',
     rewardTier: '94+ OVR Flash Player & 2,500 Gems',
     featuredPlayerIds: ['ply-vinicius', 'ply-bellingham'],
     participantCount: 890400,
     progressPercentage: 84,
     tags: ['Flash 24H', 'Limited Time', 'Gauntlet', 'Weekend'],
-    requirements: {
-      minOvr: 92,
-      energyCostPerMatch: 20,
-    },
+    requirements: { minOvr: 92, energyCostPerMatch: 20 },
     liveFormMultiplier: 1.5,
+    updatedAt: subDays(0.2),
+    updatedBy: 'marcus.lead@eafc.live',
   },
   {
     id: 'evt-icon-journey-zidane',
     title: 'Icon Journey: Zinedine Zidane Masterclass',
     subtitle: 'Relive iconic career chapters from Bordeaux to Madrid',
     bannerUrl: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=1200&q=80',
+    category: 'MILESTONE',
     type: 'MILESTONE',
     status: 'ACTIVE',
     priority: 'MEDIUM',
+    isFeatured: false,
     startDate: subDays(14),
     endDate: addDays(45),
     resetTimeDailyUtc: '19:00 UTC',
@@ -94,40 +99,20 @@ export const INITIAL_EVENTS: LiveEvent[] = [
     participantCount: 3120000,
     progressPercentage: 55,
     tags: ['Icons', 'Zidane', 'Permanent Journey', 'PVE'],
-    requirements: {
-      minOvr: 85,
-      requiredLeague: 'La Liga / Serie A',
-    },
-  },
-  {
-    id: 'evt-rulebreakers-reboot',
-    title: 'Rulebreakers: Unorthodox Playing Styles',
-    subtitle: 'Defenders with striker finishing, strikers with brick-wall defense',
-    bannerUrl: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&w=1200&q=80',
-    type: 'PROMO',
-    status: 'PAUSED',
-    priority: 'HIGH',
-    startDate: subDays(2),
-    endDate: addDays(5),
-    resetTimeDailyUtc: '19:00 UTC',
-    description: 'Live-ops temporary pause due to chemistry rating calculation glitch in V2.4 client. Operations team scheduled to resume after hotfix deployment.',
-    rewardTier: '93-95 OVR Rulebreaker Shapeshifter',
-    featuredPlayerIds: ['ply-saka', 'ply-vvd'],
-    participantCount: 450100,
-    progressPercentage: 30,
-    tags: ['Rulebreakers', 'Paused', 'Hotfix Pending'],
-    requirements: {
-      minOvr: 87,
-    },
+    requirements: { minOvr: 85, requiredLeague: 'La Liga / Serie A' },
+    updatedAt: subDays(5),
+    updatedBy: 'sarah.liveops@eafc.live',
   },
   {
     id: 'evt-division-rivals-season-6',
     title: 'Division Rivals: Global Season 6 Finale',
     subtitle: 'Push for FIFA Champion rank before weekly leaderboard reset',
     bannerUrl: 'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?auto=format&fit=crop&w=1200&q=80',
+    category: 'CHALLENGE',
     type: 'CHALLENGE',
     status: 'ACTIVE',
     priority: 'HIGH',
+    isFeatured: true,
     startDate: subDays(5),
     endDate: addDays(2),
     resetTimeDailyUtc: '02:00 UTC',
@@ -137,41 +122,325 @@ export const INITIAL_EVENTS: LiveEvent[] = [
     participantCount: 4950000,
     progressPercentage: 91,
     tags: ['H2H', 'VSA', 'Ranked', 'Division Rivals'],
-    requirements: {
-      minOvr: 90,
-    },
+    requirements: { minOvr: 90 },
+    updatedAt: subDays(1),
+    updatedBy: 'alex.ops@eafc.live',
   },
+  {
+    id: 'evt-weekend-challenge-mode',
+    title: 'Weekend League Challenge Mode: Knockout Tier',
+    subtitle: 'Survive 4 knockouts against real FC Mobile opponents',
+    bannerUrl: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&w=1200&q=80',
+    category: 'CHALLENGE',
+    type: 'CHALLENGE',
+    status: 'ACTIVE',
+    priority: 'HIGH',
+    isFeatured: false,
+    startDate: subDays(1),
+    endDate: addHours(18), // Approaching deadline!
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Weekend tournament mode. 1 defeat elimination bracket with buy-in gem tickets. Grand final unlocks guaranteed 92+ tradeable player.',
+    rewardTier: '92+ OVR Tradeable Pack & 1,500 Gems',
+    featuredPlayerIds: ['ply-saka'],
+    participantCount: 1650000,
+    progressPercentage: 74,
+    tags: ['Weekend League', 'PvP', 'Knockout'],
+    requirements: { minOvr: 86, energyCostPerMatch: 15 },
+    updatedAt: subDays(0.4),
+    updatedBy: 'marcus.lead@eafc.live',
+  },
+  {
+    id: 'evt-heroes-journey-forlan',
+    title: 'Heroes Journey: Diego Forlán Legend Saga',
+    subtitle: 'Unlock 95 OVR Prime Hero with lethal long shots',
+    bannerUrl: 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=1200&q=80',
+    category: 'MILESTONE',
+    type: 'MILESTONE',
+    status: 'ACTIVE',
+    priority: 'MEDIUM',
+    isFeatured: false,
+    startDate: subDays(10),
+    endDate: addDays(25),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Complete 4 phases of PvE skill games and matches against historic clubs to redeem the 95 OVR Diego Forlán Hero item.',
+    rewardTier: '95 OVR Prime Hero Diego Forlán',
+    featuredPlayerIds: [],
+    participantCount: 920000,
+    progressPercentage: 48,
+    tags: ['Heroes', 'Journey', 'Milestone'],
+    requirements: { minOvr: 84 },
+    updatedAt: subDays(4),
+    updatedBy: 'sarah.liveops@eafc.live',
+  },
+  {
+    id: 'evt-rulebreakers-reboot',
+    title: 'Rulebreakers: Unorthodox Playing Styles',
+    subtitle: 'Defenders with striker finishing, strikers with brick-wall defense',
+    bannerUrl: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&w=1200&q=80',
+    category: 'SPECIAL',
+    type: 'SPECIAL',
+    status: 'PAUSED', // Operator paused
+    priority: 'HIGH',
+    isFeatured: false,
+    startDate: subDays(2),
+    endDate: addDays(5),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Live-ops temporary pause due to chemistry rating calculation glitch in V2.4 client. Operations team scheduled to resume after hotfix deployment.',
+    rewardTier: '93-95 OVR Rulebreaker Shapeshifter',
+    featuredPlayerIds: ['ply-saka', 'ply-vvd'],
+    participantCount: 450100,
+    progressPercentage: 30,
+    tags: ['Rulebreakers', 'Paused', 'Special'],
+    requirements: { minOvr: 87 },
+    updatedAt: subDays(0.1),
+    updatedBy: 'marcus.lead@eafc.live',
+  },
+
+  // 2. UPCOMING EVENTS (10 events)
   {
     id: 'evt-winter-wildcards-upcoming',
     title: 'Winter Wildcards: Frostbite Festival',
     subtitle: 'Upcoming winter holiday celebration with mystery daily gifts',
     bannerUrl: 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=1200&q=80',
-    type: 'PROMO',
+    category: 'SEASONAL',
+    type: 'SEASONAL',
     status: 'UPCOMING',
-    priority: 'MEDIUM',
+    priority: 'HIGH',
+    isFeatured: true,
     startDate: addDays(3),
     endDate: addDays(24),
     resetTimeDailyUtc: '19:00 UTC',
     description: 'Prepared live-ops campaign ready for holiday launch. Features daily Advent calendar rewards, Frost token exchanges, and 96 OVR Snow Day Master items.',
     rewardTier: '96 OVR Snow Day Master Item',
-    featuredPlayerIds: ['ply-saka', 'ply-debruyne'],
+    featuredPlayerIds: ['ply-saka'],
     participantCount: 0,
     progressPercentage: 0,
     tags: ['Upcoming', 'Holiday', 'Winter', 'Tokens'],
-    requirements: {
-      minOvr: 80,
-    },
+    requirements: { minOvr: 80 },
+    updatedAt: subDays(0.8),
+    updatedBy: 'sarah.liveops@eafc.live',
   },
+  {
+    id: 'evt-future-stars-2026',
+    title: 'Future Stars: Wonderkid Vanguard',
+    subtitle: 'Celebrate the breakthrough prodigies of world football',
+    bannerUrl: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=1200&q=80',
+    category: 'SPECIAL',
+    type: 'SPECIAL',
+    status: 'UPCOMING',
+    priority: 'HIGH',
+    isFeatured: true,
+    startDate: addDays(7),
+    endDate: addDays(28),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Upcoming campaign highlighting U23 young talents with boosted potential ratings and custom dynamic celebrations.',
+    rewardTier: '95+ OVR Future Star Academy Card',
+    featuredPlayerIds: [],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Future Stars', 'Wonderkids', 'Special'],
+    requirements: { minOvr: 82 },
+    updatedAt: subDays(1.5),
+    updatedBy: 'alex.ops@eafc.live',
+  },
+  {
+    id: 'evt-ucl-quarterfinals-clash',
+    title: 'UEFA Champions League: Quarterfinal Knockouts',
+    subtitle: 'Second phase of UCL RTTF tournament',
+    bannerUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1200&q=80',
+    category: 'TOURNAMENT',
+    type: 'TOURNAMENT',
+    status: 'UPCOMING',
+    priority: 'HIGH',
+    isFeatured: false,
+    startDate: addDays(12),
+    endDate: addDays(30),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Next stage of UCL bracket. Upgraded stats for clubs advancing to the last 8 in Europe.',
+    rewardTier: '97 OVR UCL Star Select',
+    featuredPlayerIds: ['ply-haaland'],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['UCL', 'Quarterfinals', 'Tournament'],
+    requirements: { minOvr: 90 },
+    updatedAt: subDays(2),
+    updatedBy: 'alex.ops@eafc.live',
+  },
+  {
+    id: 'evt-flash-sale-derby',
+    title: 'Flash 12H Lightning Sale: North London Derby',
+    subtitle: 'High stakes lightning rounds with tripled drop rates',
+    bannerUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+    category: 'FLASH_SALE',
+    type: 'FLASH_SALE',
+    status: 'UPCOMING',
+    priority: 'CRITICAL',
+    isFeatured: false,
+    startDate: addDays(2),
+    endDate: addDays(2.5),
+    resetTimeDailyUtc: '12:00 UTC',
+    description: '12-hour flash event with limited pack opening allocations and special derby tokens.',
+    rewardTier: '94+ OVR Flash Player',
+    featuredPlayerIds: ['ply-saka'],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Flash', 'Derby', 'Limited'],
+    requirements: { minOvr: 85 },
+    updatedAt: subDays(0.3),
+    updatedBy: 'marcus.lead@eafc.live',
+  },
+  {
+    id: 'evt-spring-carnival-showcase',
+    title: 'Spring Carnival: Samba & Sol',
+    subtitle: 'Colorful celebration of South American club skill and flair',
+    bannerUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
+    category: 'SEASONAL',
+    type: 'SEASONAL',
+    status: 'UPCOMING',
+    priority: 'MEDIUM',
+    isFeatured: false,
+    startDate: addDays(20),
+    endDate: addDays(40),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Spring festival featuring samba dance moves, mask tokens, and 95 OVR Brazilian flair masters.',
+    rewardTier: '95 OVR Samba Carnival Master',
+    featuredPlayerIds: ['ply-vinicius'],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Carnival', 'Seasonal', 'Samba'],
+    requirements: { minOvr: 82 },
+    updatedAt: subDays(3),
+    updatedBy: 'sarah.liveops@eafc.live',
+  },
+  {
+    id: 'evt-copa-america-warmup',
+    title: 'Continental Showdown: Americas Cup Warmup',
+    subtitle: 'International qualifying bracket for national teams',
+    bannerUrl: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=1200&q=80',
+    category: 'TOURNAMENT',
+    type: 'TOURNAMENT',
+    status: 'UPCOMING',
+    priority: 'MEDIUM',
+    isFeatured: false,
+    startDate: addDays(15),
+    endDate: addDays(35),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'National team squads compete in group stage simulations with international chemistry bonuses.',
+    rewardTier: '96 OVR National Hero Card',
+    featuredPlayerIds: ['ply-messi'],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Americas', 'International', 'Tournament'],
+    requirements: { minOvr: 88 },
+    updatedAt: subDays(2.5),
+    updatedBy: 'alex.ops@eafc.live',
+  },
+  {
+    id: 'evt-flash-sale-toty-honourable',
+    title: 'Flash 24H: TOTY Honourable Mentions',
+    subtitle: 'Last chance redemption round for top-voted stars',
+    bannerUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+    category: 'FLASH_SALE',
+    type: 'FLASH_SALE',
+    status: 'UPCOMING',
+    priority: 'HIGH',
+    isFeatured: false,
+    startDate: addDays(8),
+    endDate: addDays(9),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Honourable mentions chapter for players who narrowly missed the starting XI.',
+    rewardTier: '94-96 OVR Honourable Mention Item',
+    featuredPlayerIds: ['ply-debruyne'],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['TOTY', 'Flash', 'Honourable'],
+    requirements: { minOvr: 89 },
+    updatedAt: subDays(1.1),
+    updatedBy: 'marcus.lead@eafc.live',
+  },
+  {
+    id: 'evt-icon-journey-beckham',
+    title: 'Icon Journey: David Beckham Free Kick Legend',
+    subtitle: 'Master the art of bending crosses and set pieces',
+    bannerUrl: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=1200&q=80',
+    category: 'MILESTONE',
+    type: 'MILESTONE',
+    status: 'UPCOMING',
+    priority: 'MEDIUM',
+    isFeatured: false,
+    startDate: addDays(5),
+    endDate: addDays(50),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Follow Beckham from Manchester to Madrid and Milan. Earn 98 OVR Prime Icon David Beckham with 99 Curve.',
+    rewardTier: '98 OVR Prime Icon David Beckham',
+    featuredPlayerIds: [],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Beckham', 'Icons', 'Milestone'],
+    requirements: { minOvr: 85 },
+    updatedAt: subDays(3.2),
+    updatedBy: 'sarah.liveops@eafc.live',
+  },
+  {
+    id: 'evt-division-rivals-season-7',
+    title: 'Division Rivals: Global Season 7 Kickoff',
+    subtitle: 'New season tier ladders and refreshed leaderboard rewards',
+    bannerUrl: 'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?auto=format&fit=crop&w=1200&q=80',
+    category: 'CHALLENGE',
+    type: 'CHALLENGE',
+    status: 'UPCOMING',
+    priority: 'HIGH',
+    isFeatured: false,
+    startDate: addDays(2.2),
+    endDate: addDays(32),
+    resetTimeDailyUtc: '02:00 UTC',
+    description: 'Rank reset for global PvP division ladders. Climb back to FC Champion with refreshed milestone crates.',
+    rewardTier: 'Season 7 Division Master Token',
+    featuredPlayerIds: [],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Ranked', 'PvP', 'Season 7'],
+    requirements: { minOvr: 85 },
+    updatedAt: subDays(0.5),
+    updatedBy: 'alex.ops@eafc.live',
+  },
+  {
+    id: 'evt-shapeshifters-preview',
+    title: 'Shapeshifters: Position Inversion Chapter',
+    subtitle: 'Strikers at Centre-Back, Goalkeepers on the Wing',
+    bannerUrl: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&w=1200&q=80',
+    category: 'SPECIAL',
+    type: 'SPECIAL',
+    status: 'UPCOMING',
+    priority: 'MEDIUM',
+    isFeatured: false,
+    startDate: addDays(14),
+    endDate: addDays(35),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Wild position-swapped player items with inverted stats and chemistry overrides.',
+    rewardTier: '95 OVR Shapeshifter Selection Item',
+    featuredPlayerIds: ['ply-vvd'],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Shapeshifters', 'Special', 'Positions'],
+    requirements: { minOvr: 87 },
+    updatedAt: subDays(2.1),
+    updatedBy: 'marcus.lead@eafc.live',
+  },
+
+  // 3. EXPIRED / CONCLUDED EVENTS (5 events)
   {
     id: 'evt-heritage-champions-concluded',
     title: 'Heritage Champions: Latin America Classic',
     subtitle: 'Copa Libertadores & Sudamericana showcase (Concluded)',
     bannerUrl: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=1200&q=80',
+    category: 'TOURNAMENT',
     type: 'TOURNAMENT',
     status: 'CONCLUDED',
     priority: 'NORMAL',
-    startDate: subDays(20),
-    endDate: subDays(1),
+    isFeatured: false,
+    startDate: subDays(25),
+    endDate: subDays(2),
     resetTimeDailyUtc: '19:00 UTC',
     description: 'Celebration of iconic South American club football legends. Campaign has concluded; reward redemption window is closed.',
     rewardTier: '92-94 OVR Libertadores Icon',
@@ -179,9 +448,127 @@ export const INITIAL_EVENTS: LiveEvent[] = [
     participantCount: 1890000,
     progressPercentage: 100,
     tags: ['Archived', 'Concluded', 'Heritage'],
-    requirements: {
-      minOvr: 84,
-    },
+    requirements: { minOvr: 84 },
+    updatedAt: subDays(2),
+    updatedBy: 'alex.ops@eafc.live',
+  },
+  {
+    id: 'evt-black-friday-flash-expired',
+    title: 'Black Friday 48H Lightning Blitz (Concluded)',
+    subtitle: 'Flash discount packs and hourly token lightning rounds',
+    bannerUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+    category: 'FLASH_SALE',
+    type: 'FLASH_SALE',
+    status: 'CONCLUDED',
+    priority: 'CRITICAL',
+    isFeatured: false,
+    startDate: subDays(15),
+    endDate: subDays(13),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Completed limited flash weekend event with 50% gem discounts on store bundles.',
+    rewardTier: 'Black Friday Super Pack',
+    featuredPlayerIds: [],
+    participantCount: 3450000,
+    progressPercentage: 100,
+    tags: ['Black Friday', 'Flash', 'Concluded'],
+    requirements: { minOvr: 80 },
+    updatedAt: subDays(13),
+    updatedBy: 'marcus.lead@eafc.live',
+  },
+  {
+    id: 'evt-founders-season-1-expired',
+    title: 'FC Mobile Founders: Pioneer Awakening (Concluded)',
+    subtitle: 'Commemorative launch celebration for early adopters',
+    bannerUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
+    category: 'SEASONAL',
+    type: 'SEASONAL',
+    status: 'CONCLUDED',
+    priority: 'NORMAL',
+    isFeatured: false,
+    startDate: subDays(60),
+    endDate: subDays(10),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Founding season celebration with permanent Pioneer captain armbands and logo crests.',
+    rewardTier: 'Pioneer Captain Badge',
+    featuredPlayerIds: ['ply-cr7'],
+    participantCount: 5200000,
+    progressPercentage: 100,
+    tags: ['Founders', 'Pioneer', 'Archived'],
+    requirements: { minOvr: 75 },
+    updatedAt: subDays(10),
+    updatedBy: 'sarah.liveops@eafc.live',
+  },
+  {
+    id: 'evt-autumn-harvest-challenge-expired',
+    title: 'Autumn Harvest: Mid-Season Cup (Concluded)',
+    subtitle: 'Midfield maestros and harvest token exchanges',
+    bannerUrl: 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&w=1200&q=80',
+    category: 'CHALLENGE',
+    type: 'CHALLENGE',
+    status: 'CONCLUDED',
+    priority: 'NORMAL',
+    isFeatured: false,
+    startDate: subDays(40),
+    endDate: subDays(12),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Completed autumn cup gauntlet featuring midfield conductors and harvest emblems.',
+    rewardTier: '93 OVR Harvest Maestro',
+    featuredPlayerIds: ['ply-rodri'],
+    participantCount: 1780000,
+    progressPercentage: 100,
+    tags: ['Autumn', 'Challenge', 'Concluded'],
+    requirements: { minOvr: 83 },
+    updatedAt: subDays(12),
+    updatedBy: 'alex.ops@eafc.live',
+  },
+  {
+    id: 'evt-halloween-fright-night-expired',
+    title: 'Fright Night: Haunted Pitch Showdown (Concluded)',
+    subtitle: 'Halloween spooky stadium themes and pumpkin token rewards',
+    bannerUrl: 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=1200&q=80',
+    category: 'SPECIAL',
+    type: 'SPECIAL',
+    status: 'CONCLUDED',
+    priority: 'NORMAL',
+    isFeatured: false,
+    startDate: subDays(30),
+    endDate: subDays(9),
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'Halloween seasonal event concluded. Haunted pitch cosmetics archived to legacy vanity catalog.',
+    rewardTier: 'Haunted Pumpkin Stadium Item',
+    featuredPlayerIds: [],
+    participantCount: 2210000,
+    progressPercentage: 100,
+    tags: ['Halloween', 'Special', 'Concluded'],
+    requirements: { minOvr: 80 },
+    updatedAt: subDays(9),
+    updatedBy: 'sarah.liveops@eafc.live',
+  },
+
+  // 4. MISCONFIGURED EVENT (1 event - Intentionally flawed configuration for live-ops auditing & edge-case testing!)
+  {
+    id: 'evt-misconfigured-test-glitch',
+    title: '⚠️ [Audit Alert] Starlight Arena: Configuration Glitch',
+    subtitle: 'Live-Ops audit warning: End date is scheduled before start date!',
+    bannerUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+    category: 'SPECIAL',
+    type: 'SPECIAL',
+    status: 'MISCONFIGURED',
+    priority: 'CRITICAL',
+    isFeatured: false,
+    startDate: addDays(10), // Starts in 10 days
+    endDate: addDays(2),    // But ends in 2 days! (Flawed configuration)
+    resetTimeDailyUtc: '19:00 UTC',
+    description: 'This event was intentionally configured with End Date earlier than Start Date to test the live-ops scheduling validator and alert system.',
+    rewardTier: 'Invalid Reward Pack',
+    featuredPlayerIds: [],
+    participantCount: 0,
+    progressPercentage: 0,
+    tags: ['Audit', 'Misconfigured', 'Warning', 'EdgeCase'],
+    requirements: { minOvr: 99 },
+    updatedAt: subDays(0.1),
+    updatedBy: 'qa.auditor@eafc.live',
+    validationErrors: ['End date must be scheduled after start date (End Date <= Start Date).'],
   },
 ];
 
@@ -199,14 +586,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 97,
     baseOvr: 97,
     cardType: 'TOTY',
-    stats: {
-      pace: 99,
-      shooting: 96,
-      passing: 88,
-      dribbling: 97,
-      defending: 42,
-      physical: 84,
-    },
+    stats: { pace: 99, shooting: 96, passing: 88, dribbling: 97, defending: 42, physical: 84 },
     weakFoot: 5,
     skillMoves: 5,
     traits: ['Speed Dribbler', 'Finesse Shot', 'Outside Foot Shot', 'Flair'],
@@ -230,14 +610,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 97,
     baseOvr: 97,
     cardType: 'TOTY',
-    stats: {
-      pace: 89,
-      shooting: 94,
-      passing: 93,
-      dribbling: 95,
-      defending: 86,
-      physical: 92,
-    },
+    stats: { pace: 89, shooting: 94, passing: 93, dribbling: 95, defending: 86, physical: 92 },
     weakFoot: 4,
     skillMoves: 4,
     traits: ['Relentless Engine', 'Long Shot Taker', 'Power Header', 'Playmaker'],
@@ -261,14 +634,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 96,
     baseOvr: 96,
     cardType: 'UCL_RTTF',
-    stats: {
-      pace: 95,
-      shooting: 98,
-      passing: 78,
-      dribbling: 87,
-      defending: 50,
-      physical: 96,
-    },
+    stats: { pace: 95, shooting: 98, passing: 78, dribbling: 87, defending: 50, physical: 96 },
     weakFoot: 4,
     skillMoves: 4,
     traits: ['Acrobatic Finisher', 'Power Header', 'Target Forward', 'Bull Rush'],
@@ -292,14 +658,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 95,
     baseOvr: 95,
     cardType: 'RULEBREAKER',
-    stats: {
-      pace: 99,
-      shooting: 92,
-      passing: 87,
-      dribbling: 98,
-      defending: 39,
-      physical: 76,
-    },
+    stats: { pace: 99, shooting: 92, passing: 87, dribbling: 98, defending: 39, physical: 76 },
     weakFoot: 5,
     skillMoves: 5,
     traits: ['Speed Dribbler', 'Trickster', 'Chip Shot', 'Flair'],
@@ -323,14 +682,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 99,
     baseOvr: 99,
     cardType: 'PRIME_ICON',
-    stats: {
-      pace: 90,
-      shooting: 96,
-      passing: 99,
-      dribbling: 98,
-      defending: 82,
-      physical: 91,
-    },
+    stats: { pace: 90, shooting: 96, passing: 99, dribbling: 98, defending: 82, physical: 91 },
     weakFoot: 5,
     skillMoves: 5,
     traits: ['Roulette Maestro', 'Precision Passer', 'Long Shot Specialist', 'Iconic Volley'],
@@ -354,14 +706,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 98,
     baseOvr: 98,
     cardType: 'PRIME_ICON',
-    stats: {
-      pace: 94,
-      shooting: 98,
-      passing: 99,
-      dribbling: 99,
-      defending: 40,
-      physical: 75,
-    },
+    stats: { pace: 94, shooting: 98, passing: 99, dribbling: 99, defending: 40, physical: 75 },
     weakFoot: 5,
     skillMoves: 5,
     traits: ['Finesse Master', 'Dribbling Genius', 'Playmaker', 'Set Piece Master'],
@@ -385,14 +730,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 98,
     baseOvr: 98,
     cardType: 'PRIME_ICON',
-    stats: {
-      pace: 94,
-      shooting: 99,
-      passing: 86,
-      dribbling: 93,
-      defending: 45,
-      physical: 95,
-    },
+    stats: { pace: 94, shooting: 99, passing: 86, dribbling: 93, defending: 45, physical: 95 },
     weakFoot: 5,
     skillMoves: 5,
     traits: ['Power Header', 'Knuckleball', 'Outside Foot', 'Aerial Threat'],
@@ -416,14 +754,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 96,
     baseOvr: 96,
     cardType: 'HERO',
-    stats: {
-      pace: 88,
-      shooting: 65,
-      passing: 84,
-      dribbling: 82,
-      defending: 98,
-      physical: 97,
-    },
+    stats: { pace: 88, shooting: 65, passing: 84, dribbling: 82, defending: 98, physical: 97 },
     weakFoot: 4,
     skillMoves: 3,
     traits: ['Aerial Fortress', 'Dive into Tackles', 'Leader', 'Long Passer'],
@@ -447,14 +778,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 96,
     baseOvr: 96,
     cardType: 'TOTY',
-    stats: {
-      pace: 82,
-      shooting: 89,
-      passing: 95,
-      dribbling: 90,
-      defending: 96,
-      physical: 94,
-    },
+    stats: { pace: 82, shooting: 89, passing: 95, dribbling: 90, defending: 96, physical: 94 },
     weakFoot: 4,
     skillMoves: 3,
     traits: ['Holding Midfield Anchor', 'Long Passer', 'Power Shot', 'Intercept+'],
@@ -478,14 +802,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 96,
     baseOvr: 96,
     cardType: 'TOTS',
-    stats: {
-      pace: 84,
-      shooting: 95,
-      passing: 99,
-      dribbling: 92,
-      defending: 78,
-      physical: 86,
-    },
+    stats: { pace: 84, shooting: 95, passing: 99, dribbling: 92, defending: 78, physical: 86 },
     weakFoot: 5,
     skillMoves: 4,
     traits: ['Incivisive Through Ball', 'Whipped Crosser', 'Long Shot Specialist'],
@@ -509,14 +826,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 94,
     baseOvr: 94,
     cardType: 'RULEBREAKER',
-    stats: {
-      pace: 96,
-      shooting: 91,
-      passing: 90,
-      dribbling: 95,
-      defending: 68,
-      physical: 82,
-    },
+    stats: { pace: 96, shooting: 91, passing: 90, dribbling: 95, defending: 68, physical: 82 },
     weakFoot: 4,
     skillMoves: 4,
     traits: ['Cutting Inside', 'Speedster', 'Finesse Shot'],
@@ -540,14 +850,7 @@ export const INITIAL_PLAYERS: PlayerCard[] = [
     ovr: 95,
     baseOvr: 95,
     cardType: 'TOTY',
-    stats: {
-      pace: 88, // GK Diving
-      shooting: 90, // GK Handling
-      passing: 93, // GK Kicking
-      dribbling: 94, // GK Reflexes
-      defending: 62, // Speed
-      physical: 92, // GK Positioning
-    },
+    stats: { pace: 88, shooting: 90, passing: 93, dribbling: 94, defending: 62, physical: 92 },
     weakFoot: 3,
     skillMoves: 1,
     traits: ['Sweeper Keeper', '1-on-1 Specialist', 'Rushes Out of Goal'],
@@ -692,7 +995,6 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
   },
 ];
 
-// In-Memory Database Storage
 class MockDatabase {
   private events: LiveEvent[] = JSON.parse(JSON.stringify(INITIAL_EVENTS));
   private players: PlayerCard[] = JSON.parse(JSON.stringify(INITIAL_PLAYERS));
@@ -700,22 +1002,51 @@ class MockDatabase {
   private broadcasts: BroadcastAlert[] = JSON.parse(JSON.stringify(INITIAL_BROADCASTS));
   private auditLogs: AuditLogEntry[] = JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS));
 
-  // Events
-  getEvents() {
-    return this.events;
+  getEvents(): LiveEvent[] {
+    const currentNow = Date.now();
+    // Dynamically derive current status for accurate scheduling
+    return this.events.map(event => {
+      const derived = deriveEventStatus(event, currentNow);
+      const val = validateEvent(event);
+      return {
+        ...event,
+        status: derived,
+        validationErrors: val.errors.length > 0 ? val.errors : undefined,
+      };
+    });
   }
 
-  getEventById(id: string) {
-    return this.events.find(e => e.id === id);
+  getEventById(id: string): LiveEvent | undefined {
+    const found = this.events.find(e => e.id === id);
+    if (!found) return undefined;
+    const derived = deriveEventStatus(found, Date.now());
+    const val = validateEvent(found);
+    return {
+      ...found,
+      status: derived,
+      validationErrors: val.errors.length > 0 ? val.errors : undefined,
+    };
   }
 
-  createEvent(eventData: Omit<LiveEvent, 'id' | 'participantCount' | 'progressPercentage'>): LiveEvent {
+  createEvent(eventData: Omit<LiveEvent, 'id' | 'participantCount' | 'progressPercentage' | 'updatedAt' | 'updatedBy'>): LiveEvent {
+    const nowIso = new Date().toISOString();
     const newEvent: LiveEvent = {
       ...eventData,
       id: `evt-${Date.now().toString(36)}`,
       participantCount: 0,
       progressPercentage: 0,
+      updatedAt: nowIso,
+      updatedBy: 'operator@eafc.live',
+      category: eventData.category || eventData.type || 'SPECIAL',
+      isFeatured: !!eventData.isFeatured,
     };
+
+    const val = validateEvent(newEvent);
+    if (!val.isValid) {
+      newEvent.status = 'MISCONFIGURED';
+      newEvent.validationErrors = val.errors;
+    }
+
     this.events.unshift(newEvent);
     this.addAuditLog('OPERATOR', 'EVENT_CREATE', 'EVENT', `Created new live-ops event "${newEvent.title}"`);
     return newEvent;
@@ -724,9 +1055,24 @@ class MockDatabase {
   updateEvent(id: string, updates: Partial<LiveEvent>): LiveEvent | null {
     const index = this.events.findIndex(e => e.id === id);
     if (index === -1) return null;
-    this.events[index] = { ...this.events[index], ...updates };
-    this.addAuditLog('OPERATOR', 'EVENT_UPDATE', 'EVENT', `Updated event "${this.events[index].title}": ${Object.keys(updates).join(', ')}`);
-    return this.events[index];
+
+    const current = this.events[index];
+    const merged: LiveEvent = {
+      ...current,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+      updatedBy: 'operator@eafc.live',
+    };
+
+    const val = validateEvent(merged);
+    merged.validationErrors = val.errors.length > 0 ? val.errors : undefined;
+    if (!val.isValid) {
+      merged.status = 'MISCONFIGURED';
+    }
+
+    this.events[index] = merged;
+    this.addAuditLog('OPERATOR', 'EVENT_UPDATE', 'EVENT', `Updated event "${merged.title}": ${Object.keys(updates).join(', ')}`);
+    return merged;
   }
 
   deleteEvent(id: string): boolean {
@@ -738,7 +1084,6 @@ class MockDatabase {
     return true;
   }
 
-  // Players
   getPlayers() {
     return this.players;
   }
@@ -762,15 +1107,12 @@ class MockDatabase {
     return player;
   }
 
-  // Packs
   getPacks() {
     return this.packs;
   }
 
   simulatePackPull(packId: string): { player: PlayerCard; rarityTier: string; isWalkout: boolean } {
     const pack = this.packs.find(p => p.id === packId) || this.packs[0];
-    
-    // Weighted random selection based on drop rates
     const roll = Math.random() * 100;
     let accumulated = 0;
     let selectedTier = pack.dropRates[pack.dropRates.length - 1].range;
@@ -783,7 +1125,6 @@ class MockDatabase {
       }
     }
 
-    // Filter candidate players by pack guaranteed min OVR or tier
     const eligible = this.players.filter(p => p.ovr >= pack.guaranteedMinOvr);
     const pool = eligible.length > 0 ? eligible : this.players;
     const selectedPlayer = pool[Math.floor(Math.random() * pool.length)];
@@ -796,14 +1137,9 @@ class MockDatabase {
       `Simulated drop for "${pack.name}": Pulled ${selectedPlayer.knownAs} (${selectedPlayer.ovr} OVR) - Tier: ${selectedTier}`
     );
 
-    return {
-      player: selectedPlayer,
-      rarityTier: selectedTier,
-      isWalkout,
-    };
+    return { player: selectedPlayer, rarityTier: selectedTier, isWalkout };
   }
 
-  // Broadcasts
   getBroadcasts() {
     return this.broadcasts;
   }
@@ -827,16 +1163,46 @@ class MockDatabase {
     return true;
   }
 
-  // Metrics
   getMetrics(): LiveOpsMetrics {
-    // Dynamic slight variations for realism
+    const currentNow = Date.now();
+    const computedEvents = this.getEvents();
+
+    let active = 0;
+    let upcoming = 0;
+    let expired = 0;
+    let misconfigured = 0;
+    let approaching = 0;
+
+    const twentyFourHoursFromNow = currentNow + 24 * 3600 * 1000;
+
+    for (const e of computedEvents) {
+      if (e.status === 'ACTIVE') {
+        active++;
+        const end = new Date(e.endDate).getTime();
+        if (end > currentNow && end <= twentyFourHoursFromNow) {
+          approaching++;
+        }
+      } else if (e.status === 'UPCOMING') {
+        upcoming++;
+      } else if (e.status === 'CONCLUDED') {
+        expired++;
+      } else if (e.status === 'MISCONFIGURED') {
+        misconfigured++;
+      }
+    }
+
     const randomJitter = Math.floor(Math.random() * 1500) - 750;
     const ccu = 184520 + randomJitter;
 
     return {
+      totalEvents: computedEvents.length,
+      activeEventsCount: active,
+      upcomingEventsCount: upcoming,
+      expiredEventsCount: expired,
+      misconfiguredCount: misconfigured,
+      approachingDeadlineCount: approaching,
       ccuCurrent: ccu,
       ccuPeakToday: 245890,
-      activeEventsCount: this.events.filter(e => e.status === 'ACTIVE').length,
       activeBannersCount: this.broadcasts.filter(b => b.isActive).length,
       globalDropRateBonus: 1.25,
       serverHealth: [
@@ -851,7 +1217,6 @@ class MockDatabase {
     };
   }
 
-  // Audit Logs
   getAuditLogs() {
     return this.auditLogs;
   }
@@ -880,4 +1245,3 @@ class MockDatabase {
 }
 
 export const db = new MockDatabase();
-

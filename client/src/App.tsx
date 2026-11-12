@@ -10,6 +10,7 @@ import { PlayerCatalog } from './components/players/PlayerCatalog';
 import { StorePacksGrid } from './components/store/StorePacksGrid';
 import { OperationsView } from './components/operations/OperationsView';
 import { DevToolsInspectorPanel } from './components/performance/DevToolsInspectorPanel';
+import { InterviewGuideView } from './components/interview/InterviewGuideView';
 import { Modal } from './components/common/Modal';
 
 const DashboardContent: React.FC = () => {
@@ -29,6 +30,8 @@ const DashboardContent: React.FC = () => {
         return <OperationsView />;
       case 'performance':
         return <DevToolsInspectorPanel />;
+      case 'interview':
+        return <InterviewGuideView />;
       default:
         return <LiveOpsOverview />;
     }

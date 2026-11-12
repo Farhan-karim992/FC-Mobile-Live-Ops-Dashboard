@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { LiveEvent, EventFilterState } from '../../types';
 import { eventService } from '../../services/eventService';
@@ -8,9 +8,11 @@ import { EventCard } from './EventCard';
 import { EventFilterBar } from './EventFilterBar';
 import { EventDetailModal } from './EventDetailModal';
 import { CreateEventModal } from './CreateEventModal';
+import { EditEventModal } from './EditEventModal';
 import { Skeleton } from '../common/Skeleton';
 import { EmptyState, ErrorState } from '../common/EmptyState';
 import { Button } from '../common/Button';
+import { deriveEventStatus } from '../../utils/eventUtils';
 
 export const EventsView: React.FC = () => {
   const { addToast } = useLiveOps();
@@ -21,25 +23,25 @@ export const EventsView: React.FC = () => {
   const [filters, setFilters] = useState<EventFilterState>({
     search: '',
     status: 'ALL',
-    type: 'ALL',
+    category: 'ALL',
     sort: 'endDate',
     order: 'asc',
+    page: 1,
+    pageSize: 8,
   });
 
-  const debouncedSearch = useDebounce(filters.search, 300);
+  const debouncedSearch = useDebounce(filters.search, 250);
 
   // Modals state
   const [selectedEvent, setSelectedEvent] = useState<LiveEvent | null>(null);
+  const [editingEvent, setEditingEvent] = useState<LiveEvent | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const fetchEvents = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await eventService.getEvents({
-        ...filters,
-        search: debouncedSearch,
-      });
+      const res = await eventService.getEvents();
       if (res.success) {
         setEvents(res.data);
       }
@@ -52,7 +54,83 @@ export const EventsView: React.FC = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, [debouncedSearch, filters.status, filters.type, filters.sort, filters.order]);
+  }, []);
+
+  // Count misconfigured events across dataset
+  const misconfiguredCount = useMemo(() => {
+    const now = Date.now();
+    return events.filter(e => deriveEventStatus(e, now) === 'MISCONFIGURED').length;
+  }, [events]);
+
+  // Client-side optimized memoized filtering & sorting (avoiding repeated network trips)
+  const filteredEvents = useMemo(() => {
+    const now = Date.now();
+    let result = [...events];
+
+    // Search query
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.toLowerCase().trim();
+      result = result.filter(
+        e =>
+          e.title.toLowerCase().includes(q) ||
+          e.subtitle.toLowerCase().includes(q) ||
+          e.rewardTier.toLowerCase().includes(q) ||
+          e.tags.some(t => t.toLowerCase().includes(q))
+      );
+    }
+
+    // Status filter
+    if (filters.status && filters.status !== 'ALL') {
+      result = result.filter(e => {
+        const computed = deriveEventStatus(e, now);
+        return computed === filters.status;
+      });
+    }
+
+    // Category filter
+    if (filters.category && filters.category !== 'ALL') {
+      result = result.filter(e => {
+        const cat = e.category || e.type;
+        return cat === filters.category;
+      });
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      const isAsc = filters.order === 'asc';
+
+      if (filters.sort === 'endDate') {
+        const aEnd = new Date(a.endDate).getTime();
+        const bEnd = new Date(b.endDate).getTime();
+        return isAsc ? aEnd - bEnd : bEnd - aEnd;
+      }
+
+      if (filters.sort === 'startDate' || filters.sort === 'startDateAsc') {
+        const aStart = new Date(a.startDate).getTime();
+        const bStart = new Date(b.startDate).getTime();
+        return isAsc ? aStart - bStart : bStart - aStart;
+      }
+
+      if (filters.sort === 'participants') {
+        return isAsc ? a.participantCount - b.participantCount : b.participantCount - a.participantCount;
+      }
+
+      if (filters.sort === 'title') {
+        return isAsc ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+      }
+
+      return 0;
+    });
+
+    return result;
+  }, [events, debouncedSearch, filters.status, filters.category, filters.sort, filters.order]);
+
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / filters.pageSize));
+  const paginatedEvents = useMemo(() => {
+    const startIdx = (filters.page - 1) * filters.pageSize;
+    return filteredEvents.slice(startIdx, startIdx + filters.pageSize);
+  }, [filteredEvents, filters.page, filters.pageSize]);
 
   const handleToggleStatus = async (event: LiveEvent) => {
     try {
@@ -65,7 +143,7 @@ export const EventsView: React.FC = () => {
         }
         addToast(
           'info',
-          'Event Status Changed',
+          'Event Status Modified',
           `Event "${event.title}" is now ${nextStatus}`
         );
       }
@@ -115,18 +193,29 @@ export const EventsView: React.FC = () => {
     const res = await eventService.createEvent(data);
     if (res.success) {
       setEvents(prev => [res.data, ...prev]);
-      addToast('success', 'Event Launched', `"${res.data.title}" is now live!`);
+      addToast('success', 'Event Launched', `"${res.data.title}" is now active in Live-Ops database!`);
+    }
+  };
+
+  const handleEditSubmit = async (id: string, updates: Partial<LiveEvent>) => {
+    const res = await eventService.updateEvent(id, updates);
+    if (res.success) {
+      setEvents(prev => prev.map(e => (e.id === id ? res.data : e)));
+      if (selectedEvent && selectedEvent.id === id) {
+        setSelectedEvent(res.data);
+      }
+      addToast('success', 'Event Updated', `Changes to "${res.data.title}" saved successfully`);
     }
   };
 
   return (
     <div>
-      {/* Title & Refresh header */}
+      {/* Title & Refresh Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)' }}>Live Events Hub</h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Monitor real-time event countdowns, adjust active schedules, and inspect squad requirements.
+            Schedule campaigns, edit parameters, monitor dynamic countdowns, and audit configuration health.
           </p>
         </div>
 
@@ -135,12 +224,15 @@ export const EventsView: React.FC = () => {
         </Button>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar with Pagination */}
       <EventFilterBar
         filters={filters}
         onFilterChange={updates => setFilters(prev => ({ ...prev, ...updates }))}
         onOpenCreate={() => setIsCreateOpen(true)}
-        totalCount={events.length}
+        totalFilteredCount={filteredEvents.length}
+        totalPages={totalPages}
+        currentPage={filters.page}
+        misconfiguredCount={misconfiguredCount}
       />
 
       {/* Events Grid / Loading / Error / Empty States */}
@@ -160,26 +252,29 @@ export const EventsView: React.FC = () => {
         </div>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchEvents} />
-      ) : events.length === 0 ? (
+      ) : filteredEvents.length === 0 ? (
         <EmptyState
-          title="No live events found matching your criteria"
+          title="No live events match your filter criteria"
           description="Adjust your search keywords, event category filter, or status toggles to view more campaigns."
           actionText="Clear All Filters"
           onAction={() => setFilters({
             search: '',
             status: 'ALL',
-            type: 'ALL',
+            category: 'ALL',
             sort: 'endDate',
             order: 'asc',
+            page: 1,
+            pageSize: 8,
           })}
         />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-          {events.map(event => (
+          {paginatedEvents.map(event => (
             <EventCard
               key={event.id}
               event={event}
               onSelect={setSelectedEvent}
+              onEdit={setEditingEvent}
               onToggleStatus={handleToggleStatus}
               onExtend={handleExtend}
               onDelete={handleDelete}
@@ -193,9 +288,18 @@ export const EventsView: React.FC = () => {
         event={selectedEvent}
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
+        onEdit={setEditingEvent}
         onToggleStatus={handleToggleStatus}
         onExtend={handleExtend}
         onDelete={handleDelete}
+      />
+
+      {/* Edit Event Modal */}
+      <EditEventModal
+        event={editingEvent}
+        isOpen={!!editingEvent}
+        onClose={() => setEditingEvent(null)}
+        onSubmit={handleEditSubmit}
       />
 
       {/* Create Event Modal */}

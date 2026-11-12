@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
 import { Input, Select } from '../common/Input';
-import { LiveEvent, EventType, EventStatus, EventPriority } from '../../types';
+import { LiveEvent, EventCategory, EventStatus, EventPriority } from '../../types';
+import { validateEvent } from '../../utils/eventUtils';
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -18,48 +19,67 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<EventType>('PROMO');
+  const [category, setCategory] = useState<EventCategory>('SEASONAL');
   const [status, setStatus] = useState<EventStatus>('ACTIVE');
   const [priority, setPriority] = useState<EventPriority>('HIGH');
+  const [isFeatured, setIsFeatured] = useState(false);
   const [rewardTier, setRewardTier] = useState('');
-  const [durationDays, setDurationDays] = useState('7');
+
+  // Default start date = now, end date = now + 7 days
+  const nowIsoLocal = new Date().toISOString().substring(0, 16);
+  const defaultEndIsoLocal = new Date(Date.now() + 7 * 86400 * 1000).toISOString().substring(0, 16);
+
+  const [startDate, setStartDate] = useState(nowIsoLocal);
+  const [endDate, setEndDate] = useState(defaultEndIsoLocal);
   const [minOvr, setMinOvr] = useState('85');
-  const [tags, setTags] = useState('LiveOps, Weekend, Promo');
+  const [tags, setTags] = useState('LiveOps, Season, Special');
   const [bannerUrl, setBannerUrl] = useState('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !description.trim()) {
-      setError('Title and description are required');
+    setError('');
+
+    const startIso = new Date(startDate).toISOString();
+    const endIso = new Date(endDate).toISOString();
+
+    // Event validation check: prevents end date before start date
+    const validation = validateEvent({
+      title,
+      startDate: startIso,
+      endDate: endIso,
+    });
+
+    if (!validation.isValid) {
+      setError(validation.errors.join(' '));
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setError('');
-
-      const days = parseInt(durationDays, 10) || 7;
-      const endDate = new Date(Date.now() + days * 86400 * 1000).toISOString();
 
       await onSubmit({
         title,
         subtitle: subtitle || 'New Live-Ops Campaign',
         description,
-        type,
+        category,
+        type: category,
         status,
         priority,
+        isFeatured,
         rewardTier: rewardTier || '94+ OVR Special Edition Pack',
         bannerUrl,
-        startDate: new Date().toISOString(),
-        endDate,
+        startDate: startIso,
+        endDate: endIso,
         resetTimeDailyUtc: '19:00 UTC',
         requirements: {
           minOvr: parseInt(minOvr, 10) || 85,
           energyCostPerMatch: 10,
         },
         tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        updatedAt: new Date().toISOString(),
+        updatedBy: 'operator@eafc.live',
       });
 
       // reset & close
@@ -68,7 +88,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setDescription('');
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to create event');
+      setError(err.message || 'Failed to create live event');
     } finally {
       setIsSubmitting(false);
     }
@@ -79,7 +99,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Create New Live-Ops Event"
-      subtitle="Configure event metadata, phase duration, squad requirements, and rewards"
+      subtitle="Configure campaign metadata, schedule timestamps, squad requirements, and rewards"
       footer={
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <Button variant="ghost" size="sm" onClick={onClose} type="button">
@@ -93,13 +113,13 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {error && (
-          <div style={{ padding: '0.6rem 0.9rem', background: 'rgba(255,51,102,0.1)', border: '1px solid rgba(255,51,102,0.3)', borderRadius: 'var(--radius-sm)', color: 'var(--fc-crimson)', fontSize: '0.8rem' }}>
-            {error}
+          <div style={{ padding: '0.6rem 0.9rem', background: 'rgba(255,51,102,0.1)', border: '1px solid var(--fc-crimson)', borderRadius: 'var(--radius-sm)', color: 'var(--fc-crimson)', fontSize: '0.8rem' }}>
+            ⚠️ {error}
           </div>
         )}
 
         <Input
-          label="Event Title *"
+          label="Event Name *"
           placeholder="e.g. Winter Wildcards: Frostbite Festival"
           value={title}
           onChange={e => setTitle(e.target.value)}
@@ -107,7 +127,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
         />
 
         <Input
-          label="Subtitle / Tagline"
+          label="Subtitle / Headline"
           placeholder="e.g. Claim daily gifts and frost tokens to unlock 96 OVR Master items"
           value={subtitle}
           onChange={e => setSubtitle(e.target.value)}
@@ -115,7 +135,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
           <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-            Event Description & Mechanics *
+            Description & Reward Rules *
           </label>
           <textarea
             className="input-field"
@@ -128,13 +148,14 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
           <Select
-            label="Event Type"
-            value={type}
-            onChange={e => setType(e.target.value as EventType)}
+            label="Event Category"
+            value={category}
+            onChange={e => setCategory(e.target.value as EventCategory)}
             options={[
-              { value: 'PROMO', label: 'Promo Campaign' },
+              { value: 'SEASONAL', label: 'Seasonal Event' },
+              { value: 'SPECIAL', label: 'Special Event' },
               { value: 'TOURNAMENT', label: 'Tournament' },
               { value: 'FLASH_SALE', label: 'Flash 24H Sale' },
               { value: 'CHALLENGE', label: 'Challenge Mode' },
@@ -149,7 +170,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
             options={[
               { value: 'ACTIVE', label: 'Active (Live Now)' },
               { value: 'UPCOMING', label: 'Upcoming (Scheduled)' },
-              { value: 'PAUSED', label: 'Paused' },
+              { value: 'PAUSED', label: 'Paused (Operator Hold)' },
             ]}
           />
 
@@ -166,32 +187,55 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           />
         </div>
 
+        {/* Start Date & End Date scheduling */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
           <Input
-            label="Duration (Days)"
-            type="number"
-            min="1"
-            max="60"
-            value={durationDays}
-            onChange={e => setDurationDays(e.target.value)}
+            label="Start Date *"
+            type="datetime-local"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+            required
+          />
+
+          <Input
+            label="End Date *"
+            type="datetime-local"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+            required
+          />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <Input
+            label="Top Reward Tier"
+            placeholder="e.g. 96+ OVR Prime Icon Selection Pack"
+            value={rewardTier}
+            onChange={e => setRewardTier(e.target.value)}
           />
 
           <Input
             label="Squad Min OVR"
             type="number"
             min="60"
-            max="110"
+            max="115"
             value={minOvr}
             onChange={e => setMinOvr(e.target.value)}
           />
         </div>
 
-        <Input
-          label="Top Reward Tier"
-          placeholder="e.g. 96+ OVR Prime Icon Selection Pack"
-          value={rewardTier}
-          onChange={e => setRewardTier(e.target.value)}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.25rem' }}>
+          <input
+            type="checkbox"
+            id="createFeaturedCheckbox"
+            checked={isFeatured}
+            onChange={e => setIsFeatured(e.target.checked)}
+            style={{ width: '16px', height: '16px', accentColor: 'var(--fc-volt)', cursor: 'pointer' }}
+          />
+          <label htmlFor="createFeaturedCheckbox" style={{ fontSize: '0.85rem', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+            ★ Mark as Featured Event
+          </label>
+        </div>
 
         <Input
           label="Banner Image URL"

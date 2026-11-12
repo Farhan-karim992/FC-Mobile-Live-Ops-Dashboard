@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Plus, ArrowUpDown, Filter } from 'lucide-react';
+import { Search, Plus, ArrowUpDown, Filter, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { EventFilterState } from '../../types';
 import { Button } from '../common/Button';
 
@@ -7,37 +7,46 @@ interface EventFilterBarProps {
   filters: EventFilterState;
   onFilterChange: (updates: Partial<EventFilterState>) => void;
   onOpenCreate: () => void;
-  totalCount: number;
+  totalFilteredCount: number;
+  totalPages: number;
+  currentPage: number;
+  misconfiguredCount?: number;
 }
 
 export const EventFilterBar: React.FC<EventFilterBarProps> = ({
   filters,
   onFilterChange,
   onOpenCreate,
-  totalCount,
+  totalFilteredCount,
+  totalPages,
+  currentPage,
+  misconfiguredCount = 0,
 }) => {
   const statusOptions = [
     { label: 'All Status', value: 'ALL' },
     { label: 'Active', value: 'ACTIVE' },
     { label: 'Upcoming', value: 'UPCOMING' },
+    { label: 'Expired', value: 'CONCLUDED' },
     { label: 'Paused', value: 'PAUSED' },
-    { label: 'Concluded', value: 'CONCLUDED' },
+    { label: `Misconfigured ${misconfiguredCount > 0 ? `(${misconfiguredCount})` : ''}`, value: 'MISCONFIGURED', isWarning: misconfiguredCount > 0 },
   ];
 
-  const typeOptions = [
+  const categoryOptions = [
     { label: 'All Categories', value: 'ALL' },
-    { label: 'Promos', value: 'PROMO' },
+    { label: 'Seasonal', value: 'SEASONAL' },
+    { label: 'Special', value: 'SPECIAL' },
     { label: 'Tournaments', value: 'TOURNAMENT' },
     { label: 'Flash Sales', value: 'FLASH_SALE' },
-    { label: 'Milestones', value: 'MILESTONE' },
     { label: 'Challenges', value: 'CHALLENGE' },
+    { label: 'Milestones', value: 'MILESTONE' },
   ];
 
   const sortOptions = [
-    { label: 'Expiry Date', value: 'endDate' },
-    { label: 'Participant Count', value: 'participants' },
-    { label: 'Progress %', value: 'progress' },
-    { label: 'Title (A-Z)', value: 'title' },
+    { label: 'Earliest Ending (Approaching Deadline)', value: 'endDate', defaultOrder: 'asc' },
+    { label: 'Newest Events (Latest Start)', value: 'startDate', defaultOrder: 'desc' },
+    { label: 'Oldest Events', value: 'startDateAsc', defaultOrder: 'asc' },
+    { label: 'Participant Count', value: 'participants', defaultOrder: 'desc' },
+    { label: 'Event Name (A-Z)', value: 'title', defaultOrder: 'asc' },
   ];
 
   return (
@@ -51,7 +60,7 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
         marginBottom: '1.5rem',
       }}
     >
-      {/* Top Search & Actions row */}
+      {/* Top Search & Actions Row */}
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ position: 'relative', flex: '1', minWidth: '240px' }}>
           <Search
@@ -61,9 +70,9 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
           <input
             type="text"
             className="input-field"
-            placeholder="Search events by title, reward, tag (e.g. TOTY, Zidane, Flash)..."
+            placeholder="Search events by name, reward, or tag (e.g. TOTY, Zidane, Flash, Seasonal)..."
             value={filters.search}
-            onChange={e => onFilterChange({ search: e.target.value })}
+            onChange={e => onFilterChange({ search: e.target.value, page: 1 })}
             style={{ paddingLeft: '2.5rem' }}
           />
         </div>
@@ -75,7 +84,7 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
         </div>
       </div>
 
-      {/* Filter Chips & Dropdowns row */}
+      {/* Filter Chips & Dropdowns Row */}
       <div
         style={{
           display: 'flex',
@@ -94,10 +103,20 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
           </span>
           {statusOptions.map(opt => {
             const isSelected = filters.status === opt.value;
+            let borderColor = isSelected ? 'var(--fc-volt)' : 'var(--border-subtle)';
+            let bg = isSelected ? 'rgba(0, 255, 135, 0.15)' : 'var(--bg-secondary)';
+            let color = isSelected ? 'var(--fc-volt)' : 'var(--text-secondary)';
+
+            if (opt.isWarning) {
+              borderColor = isSelected ? 'var(--fc-crimson)' : 'rgba(255,51,102,0.4)';
+              bg = isSelected ? 'rgba(255,51,102,0.2)' : 'rgba(255,51,102,0.08)';
+              color = 'var(--fc-crimson)';
+            }
+
             return (
               <button
                 key={opt.value}
-                onClick={() => onFilterChange({ status: opt.value })}
+                onClick={() => onFilterChange({ status: opt.value, page: 1 })}
                 style={{
                   padding: '0.25rem 0.65rem',
                   borderRadius: 'var(--radius-sm)',
@@ -106,12 +125,16 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
                   fontWeight: 600,
                   cursor: 'pointer',
                   border: '1px solid',
-                  borderColor: isSelected ? 'var(--fc-volt)' : 'var(--border-subtle)',
-                  background: isSelected ? 'rgba(0, 255, 135, 0.15)' : 'var(--bg-secondary)',
-                  color: isSelected ? 'var(--fc-volt)' : 'var(--text-secondary)',
+                  borderColor,
+                  background: bg,
+                  color,
                   transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
               >
+                {opt.isWarning && <AlertTriangle size={11} />}
                 {opt.label}
               </button>
             );
@@ -120,24 +143,33 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
 
         {/* Category & Sorting Controls */}
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Category Dropdown */}
           <select
             className="input-field select-field"
-            value={filters.type}
-            onChange={e => onFilterChange({ type: e.target.value })}
-            style={{ width: 'auto', minWidth: '140px', padding: '0.35rem 1.8rem 0.35rem 0.65rem', fontSize: '0.75rem' }}
+            value={filters.category}
+            onChange={e => onFilterChange({ category: e.target.value, page: 1 })}
+            style={{ width: 'auto', minWidth: '150px', padding: '0.35rem 1.8rem 0.35rem 0.65rem', fontSize: '0.75rem' }}
           >
-            {typeOptions.map(t => (
+            {categoryOptions.map(t => (
               <option key={t.value} value={t.value}>
                 {t.label}
               </option>
             ))}
           </select>
 
+          {/* Sort Dropdown */}
           <select
             className="input-field select-field"
             value={filters.sort}
-            onChange={e => onFilterChange({ sort: e.target.value })}
-            style={{ width: 'auto', minWidth: '140px', padding: '0.35rem 1.8rem 0.35rem 0.65rem', fontSize: '0.75rem' }}
+            onChange={e => {
+              const opt = sortOptions.find(s => s.value === e.target.value);
+              onFilterChange({
+                sort: e.target.value,
+                order: (opt?.defaultOrder as any) || 'asc',
+                page: 1,
+              });
+            }}
+            style={{ width: 'auto', minWidth: '160px', padding: '0.35rem 1.8rem 0.35rem 0.65rem', fontSize: '0.75rem' }}
           >
             {sortOptions.map(s => (
               <option key={s.value} value={s.value}>
@@ -146,22 +178,60 @@ export const EventFilterBar: React.FC<EventFilterBarProps> = ({
             ))}
           </select>
 
+          {/* Asc/Desc toggle */}
           <button
             className="btn btn-secondary btn-sm"
-            onClick={() => onFilterChange({ order: filters.order === 'asc' ? 'desc' : 'asc' })}
+            onClick={() => onFilterChange({ order: filters.order === 'asc' ? 'desc' : 'asc', page: 1 })}
             title={`Sort ${filters.order === 'asc' ? 'Descending' : 'Ascending'}`}
             style={{ padding: '0.4rem 0.6rem' }}
           >
             <ArrowUpDown size={14} />
             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>{filters.order}</span>
           </button>
-
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
-            ({totalCount} items)
-          </span>
         </div>
+      </div>
+
+      {/* Pagination & Count Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '0.75rem',
+          color: 'var(--text-muted)',
+          borderTop: '1px solid var(--border-subtle)',
+          paddingTop: '0.5rem',
+        }}
+      >
+        <div>
+          Showing {totalFilteredCount} matching campaigns{' '}
+          {totalPages > 1 && `(Page ${currentPage} of ${totalPages})`}
+        </div>
+
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <button
+              className="btn btn-secondary btn-sm"
+              disabled={currentPage <= 1}
+              onClick={() => onFilterChange({ page: currentPage - 1 })}
+              style={{ padding: '0.2rem 0.45rem' }}
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', padding: '0 4px' }}>
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              className="btn btn-secondary btn-sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => onFilterChange({ page: currentPage + 1 })}
+              style={{ padding: '0.2rem 0.45rem' }}
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-

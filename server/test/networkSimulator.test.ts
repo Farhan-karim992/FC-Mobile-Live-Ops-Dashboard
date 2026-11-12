@@ -99,3 +99,4 @@ describe('Network Simulator & Error Middleware', () => {
     assert.strictEqual(res.data.error, 'Database connection crashed');
   });
 });
+
